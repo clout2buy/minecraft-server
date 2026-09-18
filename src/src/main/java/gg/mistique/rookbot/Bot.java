@@ -12,14 +12,16 @@ import org.bukkit.util.Vector;
 import java.util.*;
 
 /**
- * One bot per owner. The body is a Zombie with AI off (player-shaped, works on every
- * Via client, no NMS); movement, mining, building and pickups are driven by the tick loop
- * so the bot behaves like a player would: walk to the block, swing, break, collect.
+ * One bot per owner. The body is a Zombie (player-shaped, works on every Via client, no NMS)
+ * with awareness off so it never targets; Paper's Mob.getPathfinder() drives real walking.
+ * Mining, building and pickups run from the tick loop: walk to the block, swing with crack
+ * stages, break, collect into the bag.
  */
 public final class Bot {
     public enum Mode { IDLE, FOLLOW, STAY, COME, WOOD, STONE, HOUSE, POSSESSED }
 
-    private static final double SPEED = 0.28;           // blocks per tick-step (~5.6 b/s, player sprint-ish)
+    private static final double SPEED = 0.28;           // possess-mode manual drive step
+    private static final double WALK_SPEED = 1.15;      // navigator speed multiplier (zombie base 0.23 -> ~player walk)
     private static final int   REACH = 4;
     private static final int   SEARCH = 24;
     private static final int   BREAK_TICKS_WOOD = 4;    // in 5-tick steps
@@ -44,7 +46,9 @@ public final class Bot {
         Location at = owner.getLocation().add(owner.getLocation().getDirection().setY(0).normalize().multiply(2));
         at.setY(owner.getLocation().getY());
         body = owner.getWorld().spawn(at, Zombie.class, z -> {
-            z.setAI(false); z.setSilent(true); z.setBaby(false); z.setShouldBurnInDay(false);
+            // AI stays ON so the vanilla navigator animates legs + handles slopes/jumps; goals are
+            // stripped so it never chases/attacks. setAware(false) blocks target selection entirely.
+            z.setAware(false); z.setSilent(true); z.setBaby(false); z.setShouldBurnInDay(false);
             z.setRemoveWhenFarAway(false); z.setPersistent(true); z.setCanPickupItems(false);
             z.customName(Component.text(name, NamedTextColor.AQUA)); z.setCustomNameVisible(true);
             z.setInvulnerable(true); z.setCollidable(false); z.setGravity(true);
@@ -116,9 +120,10 @@ public final class Bot {
         if (mode != Mode.POSSESSED) return;
         Vector d = to.toVector().subtract(from.toVector()); d.setY(0);
         if (d.lengthSquared() < 1e-6) { body.setRotation(to.getYaw(), to.getPitch()); return; }
-        Location nl = body.getLocation().add(d.normalize().multiply(SPEED));
-        nl.setYaw(to.getYaw()); nl.setPitch(to.getPitch());
-        stepTo(nl);
+        body.getPathfinder().stopPathfinding();
+        Vector v = d.normalize().multiply(SPEED); v.setY(body.getVelocity().getY());
+        if (body.isOnGround() && body.getLocation().add(v.clone().setY(0)).getBlock().getType().isSolid()) { body.setJumping(true); v.setY(0.42); }
+        body.setVelocity(v); body.setRotation(to.getYaw(), to.getPitch());
         p.teleport(body.getLocation().add(0, 0, 0)); // keep camera glued
         p.setSpectatorTarget(body);
     }
@@ -160,13 +165,17 @@ public final class Bot {
         }
         Location stand = target.getLocation().add(0.5, 0, 0.5);
         if (body.getEyeLocation().distanceSquared(stand) > REACH * REACH) { walkNear(stand, REACH - 1); return; }
+        body.getPathfinder().stopPathfinding();
         faceAt(stand);
         body.swingMainHand();
-        if (++breakProgress >= breakSteps) {
-            collect(target); gathered++; target = null;
-            if (mode == Mode.WOOD) { // trees: take the whole trunk above too
-                // next find() will pick the log above since it's nearest
-            }
+        ++breakProgress;
+        // real chop feel: crack stages on the block for everyone nearby, hit sound each swing
+        int stage = Math.min(9, (int) (9.0 * breakProgress / breakSteps));
+        for (Player near : target.getWorld().getPlayers()) if (near.getLocation().distanceSquared(stand) < 64 * 64) near.sendBlockDamage(target.getLocation(), stage / 9f, body.getEntityId());
+        target.getWorld().playSound(target.getLocation(), target.getBlockData().getSoundGroup().getHitSound(), 0.6f, 0.9f);
+        if (breakProgress >= breakSteps) {
+            for (Player near : target.getWorld().getPlayers()) near.sendBlockDamage(target.getLocation(), 0f, body.getEntityId());
+            collect(target); gathered++; target = null; // next findBlock() picks the log above (nearest)
         }
     }
 
@@ -248,29 +257,14 @@ public final class Bot {
         Location cur = body.getLocation();
         if (!cur.getWorld().equals(dst.getWorld())) { body.teleport(dst); return true; }
         double d = cur.distance(dst);
-        if (d <= dist) return true;
-        if (d > 40) { body.teleport(dst.clone().add(0, 1, 0)); return false; } // fell behind - catch up
-        Vector dir = dst.toVector().subtract(cur.toVector()); dir.setY(0);
-        if (dir.lengthSquared() < 1e-6) return true;
-        Location nl = cur.clone().add(dir.normalize().multiply(SPEED));
-        faceAt(dst);
-        stepTo(nl);
+        if (d <= dist) { body.getPathfinder().stopPathfinding(); return true; }
+        if (d > 48) { body.teleport(dst.clone().add(0, 1, 0)); return false; } // fell behind - catch up
+        // vanilla navigator: real walking animation, jumps, slopes, doors. Re-issue only when the
+        // goal moved so we don't thrash the path every tick.
+        var pf = body.getPathfinder();
+        var res = pf.getCurrentPath();
+        if (res == null || res.getFinalPoint() == null || res.getFinalPoint().distanceSquared(dst) > 1.5) pf.moveTo(dst, WALK_SPEED);
         return false;
-    }
-    private void stepTo(Location nl) {
-        World w = nl.getWorld();
-        Block feet = w.getBlockAt(nl), head = feet.getRelative(0, 1, 0);
-        if (feet.getType().isSolid()) {                 // step up one
-            Block above = head.getRelative(0, 1, 0);
-            if (!head.getType().isSolid() && !above.getType().isSolid()) nl.add(0, 1, 0);
-            else return;                                 // wall - stop (owner can path around)
-        } else {                                         // fall / walk down
-            Block below = feet.getRelative(0, -1, 0);
-            int drop = 0; while (!below.getType().isSolid() && drop < 3) { nl.subtract(0, 1, 0); below = below.getRelative(0, -1, 0); drop++; }
-        }
-        float yaw = body.getLocation().getYaw(), pitch = body.getLocation().getPitch();
-        nl.setYaw(nl.getYaw() == 0 ? yaw : nl.getYaw()); nl.setPitch(pitch);
-        body.teleport(nl);
     }
     private void faceAt(Location at) {
         Location l = body.getLocation();

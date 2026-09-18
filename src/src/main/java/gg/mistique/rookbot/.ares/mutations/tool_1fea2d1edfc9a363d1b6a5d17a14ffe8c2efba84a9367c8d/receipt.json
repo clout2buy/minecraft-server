@@ -1,0 +1,24 @@
+{
+  "version": 1,
+  "id": "tool_1fea2d1edfc9a363d1b6a5d17a14ffe8c2efba84a9367c8d",
+  "workspace": "C:\\Users\\Clout\\AppData\\Local\\Temp\\rookbot\\src\\main\\java\\gg\\mistique\\rookbot",
+  "label": "Write",
+  "status": "committed",
+  "createdAt": "2026-09-18T01:11:06.666Z",
+  "committedAt": "2026-09-18T01:11:06.683Z",
+  "journalPath": "C:\\Users\\Clout\\AppData\\Local\\Temp\\rookbot\\src\\main\\java\\gg\\mistique\\rookbot\\.ares\\mutations\\tool_1fea2d1edfc9a363d1b6a5d17a14ffe8c2efba84a9367c8d\\journal.jsonl",
+  "receiptPath": "C:\\Users\\Clout\\AppData\\Local\\Temp\\rookbot\\src\\main\\java\\gg\\mistique\\rookbot\\.ares\\mutations\\tool_1fea2d1edfc9a363d1b6a5d17a14ffe8c2efba84a9367c8d\\receipt.json",
+  "touchedFiles": [
+    "C:\\Users\\Clout\\AppData\\Local\\Temp\\rookbot\\src\\main\\java\\gg\\mistique\\rookbot\\Bot.java"
+  ],
+  "operations": [
+    {
+      "kind": "add",
+      "path": "C:\\Users\\Clout\\AppData\\Local\\Temp\\rookbot\\src\\main\\java\\gg\\mistique\\rookbot\\Bot.java",
+      "afterHash": "c4dc93bfab6e52a834f717173372553dc519059632f033f5bde8546ff38efe68",
+      "bytes": 15985,
+      "mode": 438
+    }
+  ],
+  "retainedSourceGenerations": []
+}

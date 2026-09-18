@@ -1,0 +1,8 @@
+{"event":"begin","version":1,"id":"tool_200323bc42735ff46f53cbd93240925469b2cb45c7073253","workspace":"C:\\Users\\Clout\\AppData\\Local\\Temp\\rookbot\\src\\main\\java\\gg\\mistique\\rookbot","label":"Write","createdAt":"2026-09-18T01:11:21.098Z","operations":[{"kind":"add","path":"C:\\Users\\Clout\\AppData\\Local\\Temp\\rookbot\\src\\main\\java\\gg\\mistique\\rookbot\\RookCommand.java","afterHash":"5c94b00b4ecddb9a3d54c8c1a2e9589e86a3e8b211e3a281e3b0d1ee1bd43c1b","bytes":2943,"mode":438}]}
+{"event":"assets_ready","at":"2026-09-18T01:11:21.102Z","transactionId":"tool_200323bc42735ff46f53cbd93240925469b2cb45c7073253","operation":0}
+{"event":"prepared","at":"2026-09-18T01:11:21.104Z"}
+{"event":"operation_start","at":"2026-09-18T01:11:21.105Z","operation":0,"kind":"add"}
+{"event":"operation_complete","at":"2026-09-18T01:11:21.115Z","operation":0}
+{"event":"commit_complete","at":"2026-09-18T01:11:21.117Z"}
+{"event":"receipt_written","at":"2026-09-18T01:11:21.120Z","receiptPath":"C:\\Users\\Clout\\AppData\\Local\\Temp\\rookbot\\src\\main\\java\\gg\\mistique\\rookbot\\.ares\\mutations\\tool_200323bc42735ff46f53cbd93240925469b2cb45c7073253\\receipt.json"}
+{"event":"cleanup_complete","at":"2026-09-18T01:11:21.122Z"}

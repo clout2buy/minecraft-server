@@ -1,0 +1,10 @@
+name: RookBot
+version: 1.0.0
+main: gg.mistique.rookbot.RookBotPlugin
+api-version: '1.20'
+author: Rook
+description: A player-bot you own. It gathers, builds, follows, and you can ride along.
+commands:
+  rook:
+    description: Control your Rook bot
+    usage: /rook <spawn|dismiss|follow|stay|come|wood|stone|house|inv|give|status|possess|stop>

@@ -1,0 +1,20 @@
+name: QuestBoard
+version: 1.0.0
+main: com.pallarium.questboard.QuestBoardPlugin
+api-version: '1.20'
+author: Pallarium
+description: Daily rotating quests with a GUI board, progress tracking, streaks and rewards.
+
+commands:
+  quests:
+    description: Open the daily quest board
+    usage: /quests [reroll|reload|reset <player>]
+    aliases: [quest, qb, daily]
+
+permissions:
+  questboard.use:
+    description: Open the board and complete quests
+    default: true
+  questboard.admin:
+    description: Reload config, reset players
+    default: op

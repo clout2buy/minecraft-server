@@ -54,8 +54,15 @@ public class DetailMenu extends Menu {
         lore.add(ChatColor.GRAY + "by " + ChatColor.WHITE + info.author);
         lore.add("");
         lore.add(ChatColor.GRAY + "Tag: " + ChatColor.WHITE + (info.tag.isEmpty() ? "n/a" : info.tag));
-        Material icon = info.premium ? Material.GOLD_INGOT : Material.PAPER;
+        Material icon = Icons.forPlugin(info);
         inv.setItem(13, item(icon, ChatColor.WHITE + "" + ChatColor.BOLD + info.name, lore));
+
+        org.bukkit.inventory.ItemStack head = Icons.creatorHead(info.author);
+        org.bukkit.inventory.meta.ItemMeta hm = head.getItemMeta();
+        hm.setDisplayName(ChatColor.LIGHT_PURPLE + "" + ChatColor.BOLD + info.author);
+        hm.setLore(List.of(ChatColor.GRAY + "Creator", ChatColor.DARK_GRAY + "Head shows their skin when", ChatColor.DARK_GRAY + "their SpigotMC name matches a Minecraft name"));
+        head.setItemMeta(hm);
+        inv.setItem(4, head);
 
         inv.setItem(20, item(Material.HOPPER, ChatColor.GREEN + "Downloads",
                 List.of(ChatColor.WHITE + String.format("%,d", info.downloads), ChatColor.GRAY + "(" + info.downloadsShort() + ")")));

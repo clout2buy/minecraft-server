@@ -130,8 +130,7 @@ public class ListingMenu extends Menu {
         lore.add(ChatColor.DARK_GRAY + "Updated " + info.updatedAgo());
         lore.add("");
         lore.add(ChatColor.AQUA + "Click for details");
-        Material icon = info.category == Category.SKRIPT ? Material.WRITABLE_BOOK
-                : info.premium ? Material.GOLD_INGOT : Material.PAPER;
+        Material icon = Icons.forPlugin(info);
         return item(icon, ChatColor.WHITE + "" + ChatColor.BOLD + trim(info.name, 32), lore);
     }
 

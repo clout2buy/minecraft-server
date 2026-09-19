@@ -1,0 +1,8 @@
+# Chat prefix used on every EventMaker message
+prefix: "&8[&dEvents&8] &7"
+
+# How often (seconds) the scheduler checks whether an interval event is due
+scheduler-check-seconds: 30
+
+# Show a big title on screen when an announced event starts / ends
+titles: true

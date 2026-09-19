@@ -1,0 +1,18 @@
+name: EventMaker
+version: 1.0.0
+main: com.pallarium.eventmaker.EventMakerPlugin
+api-version: '1.20'
+author: Pallarium
+description: Build and run server events from a click GUI. No commands needed.
+
+commands:
+  eventmaker:
+    description: Open the Event Maker
+    usage: /eventmaker [start|stop|list|reload] [event]
+    aliases: [em, events]
+    permission: eventmaker.admin
+
+permissions:
+  eventmaker.admin:
+    description: Create, edit and run events
+    default: op

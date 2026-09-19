@@ -1,0 +1,12 @@
+# PluginMarket
+# Categories map to Spiget resource "category" ids, except SKRIPT which is a dedicated search filter.
+spigot-category-id: 4
+skript-category-id: 25
+
+# Where downloaded jars land. They are copied into the live plugins/ folder — a server restart or /reload loads them.
+install-dir: plugins
+
+# Requests per page in the browser GUI (also Spiget page size).
+page-size: 28
+
+user-agent: "PluginMarket/1.0.0 (+https://github.com/Pallarium)"

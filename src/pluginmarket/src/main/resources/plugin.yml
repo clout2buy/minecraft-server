@@ -1,0 +1,20 @@
+name: PluginMarket
+version: 1.0.0
+main: com.pallarium.pluginmarket.PluginMarketPlugin
+api-version: '1.20'
+author: Pallarium
+description: Browse and one-click install Spigot, Bukkit and Skript plugins from an in-game GUI.
+
+commands:
+  pluginmarket:
+    description: Open the plugin browser
+    usage: /pluginmarket
+    aliases: [pm, plugins, market]
+
+permissions:
+  pluginmarket.use:
+    description: Browse the plugin market
+    default: op
+  pluginmarket.download:
+    description: Download and install plugins
+    default: op

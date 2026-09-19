@@ -1,0 +1,21 @@
+name: ENDGAME
+version: 1.0.0
+main: com.pallarium.endgame.EndgamePlugin
+api-version: '1.20'
+author: Pallarium
+description: Visual skill progression. Seven skills, fourteen perks, all driven from a GUI.
+website: https://github.com/Pallarium
+
+commands:
+  endgame:
+    description: Open the ENDGAME menu
+    usage: /endgame
+    aliases: [eg, skills, level, levels]
+
+permissions:
+  endgame.use:
+    description: Open the ENDGAME menu and earn xp
+    default: true
+  endgame.admin:
+    description: Give xp, reset players, reload config
+    default: op

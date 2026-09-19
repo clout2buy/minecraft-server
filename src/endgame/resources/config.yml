@@ -1,0 +1,64 @@
+# ENDGAME configuration
+# Everything a player touches lives in the GUI. This file is for server owners.
+
+# Global multiplier on all xp gains. 1.0 is normal, 2.0 is double.
+xp-multiplier: 1.0
+
+# Announce to the whole server when someone hits level 25, 50, 75 or 100.
+broadcast-milestones: true
+
+# Blocks a player placed award no xp when broken again.
+# Leave this on unless you want cobble tower farms to be viable.
+anti-farm: true
+
+# The hotbar item that opens the menu, so players never need a command.
+menu-item:
+  enabled: true
+  # 0 through 8, left to right across the hotbar. 8 is the far right slot.
+  slot: 8
+
+# Floating damage holograms above mobs you hit.
+# Crits, kills, heals and perk procs each get their own glyph and color.
+damage-numbers: true
+
+# A hit this many times your weapon's base damage counts as a crit.
+crit-threshold: 1.5
+
+# How often online player data is flushed to disk, in minutes.
+auto-save-minutes: 5
+
+# Randomized elite mobs: rarity tiers, affixes, rolled gear and loot tables.
+elites:
+  enabled: true
+  # Percent chance any eligible natural spawn becomes an elite.
+  # Tier is then rolled from depth, distance from spawn and dimension.
+  spawn-chance: 6.0
+  # Killing an ordinary mob can rip an elite out of the corpse.
+  # Chance scales with depth, distance and doubles at night.
+  ascension:
+    enabled: true
+    chance: 9.0
+
+# Dynamic world events. Player actions build "heat" in a trigger bucket;
+# when it boils over, a staged event chain fires near them.
+events:
+  enabled: true
+  # Heat needed before a trigger fires an event.
+  heat-threshold: 100.0
+  # Seconds before the same player can cause another event.
+  player-cooldown-seconds: 240
+  # How many events can run at once, server wide.
+  max-concurrent: 3
+  # Percent chance per minute that an ambient event fires on its own.
+  ambient-chance: 12.0
+
+# Floating heart bars above mobs and live damage numbers.
+healthbars:
+  enabled: true
+  # Normal mobs hide their bar this long after the last hit. Elites never hide.
+  hide-after-seconds: 8
+  damage-numbers: true
+
+# Custom item hover cards. Replaces the vanilla tooltip entirely.
+tooltips:
+  enabled: true

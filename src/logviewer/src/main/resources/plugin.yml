@@ -1,0 +1,17 @@
+name: LogViewer
+version: 1.0.0
+main: com.pallarium.logviewer.LogViewerPlugin
+api-version: '1.20'
+author: Pallarium
+description: In-game server log viewer with filter tabs, live tail and search.
+
+commands:
+  logs:
+    description: Open the server log viewer, or search logs with /logs <text>
+    usage: /logs [search text]
+    aliases: [serverlogs, log]
+
+permissions:
+  logviewer.use:
+    description: View server logs
+    default: op

@@ -97,8 +97,6 @@ public class PerkTreeMenu extends Menu {
         set(BANNER, banner(profile, perks));
         set(RESET, resetButton(profile));
 
-        drawXpBar(profile);
-
         // One column per tier, two perks stacked, tier marker underneath.
         for (int tier = 0; tier < TIERS; tier++) {
             int col = FIRST_COL + tier;
@@ -116,7 +114,6 @@ public class PerkTreeMenu extends Menu {
                 slotMap.put(BOTTOM_ROW + col, perk);
             }
 
-            set(TIER_ROW + col, ruler(perks, tier, level));
         }
 
         set(CLOSE, Icon.close());
@@ -135,91 +132,6 @@ public class PerkTreeMenu extends Menu {
             return Integer.MAX_VALUE;
         }
         return perks.get(idx).unlockLevel();
-    }
-
-    /** Nine glass segments under the header showing progress to the next level. */
-    private void drawXpBar(PlayerProfile profile) {
-        double progress = profile.progress(skill);
-        int filled = (int) Math.round(Math.max(0, Math.min(1, progress)) * 9);
-        int level = profile.level(skill);
-
-        for (int i = 0; i < 9; i++) {
-            boolean lit = i < filled;
-            ItemStack seg = Icon.of(lit ? Material.WHITE_STAINED_GLASS_PANE : Material.BLACK_STAINED_GLASS_PANE)
-                    .plainName(lit ? "\u2588" : " ", lit ? skill.color() : Icon.DIM)
-                    .line(Component.text("Level " + level, Icon.DIM)
-                            .append(Component.text("  \u2192  ", Icon.DIM))
-                            .append(Component.text("Level " + (level + 1), skill.color())))
-                    .line(Component.text(Math.round(progress * 100) + "% of the way there",
-                            Icon.TEXT))
-                    .build();
-            set(BAR_ROW + i, seg);
-        }
-    }
-
-    /** One tab per skill along the bottom, current tab glowing. */
-    private void drawTabs(PlayerProfile profile) {
-        Skill[] all = Skill.values();
-        for (int i = 0; i < all.length && i < 7; i++) {
-            Skill s = all[i];
-            int slot = TAB_ROW + 1 + i;
-            boolean current = s == skill;
-            int points = profile.points(s);
-
-            Icon icon = Icon.of(s.icon())
-                    .name(s.display(), current ? s.color() : Icon.DIM)
-                    .line(Component.text("Level ", Icon.DIM)
-                            .append(Component.text(profile.level(s) + " / " + XpTable.MAX_LEVEL,
-                                    current ? s.color() : Icon.TEXT)))
-                    .line(Icon.bar(profile.progress(s), 12, s.color()));
-
-            if (points > 0) {
-                icon.blank().line(Component.text(points + " point" + (points == 1 ? "" : "s")
-                        + " waiting", Icon.GOOD));
-            }
-            icon.blank().line(current ? "Viewing this tree" : "Click to view",
-                    current ? Icon.ACCENT : Icon.DIM);
-
-            set(slot, icon.glow(current || points > 0).build());
-            tabMap.put(slot, s);
-        }
-    }
-
-    /**
-     * Tier marker under each column. Same glass language as the XP bar:
-     * black = locked, skill colour = open, lime = every rank in the tier taken.
-     */
-    private ItemStack ruler(List<Perk> perks, int tier, int level) {
-        int gate = gateOf(perks, tier);
-        boolean reached = level >= gate;
-        int owned = 0;
-        int possible = 0;
-        for (int i = tier * 2; i < tier * 2 + 2 && i < perks.size(); i++) {
-            Perk p = perks.get(i);
-            owned += plugin.store().getOrCreate(player.getUniqueId(), player.getName()).rank(p);
-            possible += p.maxRank();
-        }
-
-        Material mat;
-        String state;
-        if (possible > 0 && owned >= possible) {
-            mat = Material.LIME_STAINED_GLASS_PANE;
-            state = "Complete";
-        } else if (reached) {
-            mat = Material.WHITE_STAINED_GLASS_PANE;
-            state = "Open";
-        } else {
-            mat = Material.BLACK_STAINED_GLASS_PANE;
-            state = "Locked";
-        }
-
-        return Icon.of(mat)
-                .plainName("Tier " + (tier + 1) + "  \u00b7  " + state, reached ? skill.color() : Icon.DIM)
-                .line(reached ? "Unlocks at level " + gate + "  \u2713"
-                        : "Reach level " + gate + " to unlock", reached ? Icon.GOOD : Icon.DIM)
-                .line(Component.text("Ranks taken  ", Icon.DIM)
-                        .append(Component.text(owned + " / " + possible, Icon.TEXT)))
-                .build();
     }
 
     private ItemStack banner(PlayerProfile profile, List<Perk> perks) {
@@ -331,19 +243,6 @@ public class PerkTreeMenu extends Menu {
             return Icon.GOOD;
         }
         return Icon.DIM;
-    }
-
-    /** Closest stained glass to each skill's accent colour. */
-    private static Material paneFor(Skill skill) {
-        return switch (skill) {
-            case MINING -> Material.LIGHT_BLUE_STAINED_GLASS_PANE;
-            case WOODCUTTING -> Material.GREEN_STAINED_GLASS_PANE;
-            case EXCAVATION -> Material.BROWN_STAINED_GLASS_PANE;
-            case FARMING -> Material.YELLOW_STAINED_GLASS_PANE;
-            case COMBAT -> Material.RED_STAINED_GLASS_PANE;
-            case ARCHERY -> Material.LIME_STAINED_GLASS_PANE;
-            case FISHING -> Material.CYAN_STAINED_GLASS_PANE;
-        };
     }
 
     @Override

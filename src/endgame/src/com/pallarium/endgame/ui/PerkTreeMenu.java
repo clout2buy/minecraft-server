@@ -32,7 +32,7 @@ public class PerkTreeMenu extends Menu {
     /** Header row. */
     private static final int BACK = 0;
     private static final int BANNER = 4;
-    private static final int RESET = 8;
+    private static final int NEXT = 8;
 
     /** Row 1 is the nine segment XP bar, slots 9 to 17. */
     private static final int BAR_ROW = 9;
@@ -95,7 +95,7 @@ public class PerkTreeMenu extends Menu {
 
         set(BACK, Icon.back("the hub"));
         set(BANNER, banner(profile, perks));
-        set(RESET, resetButton(profile));
+        set(NEXT, nextButton());
 
         // One column per tier, two perks stacked, tier marker underneath.
         for (int tier = 0; tier < TIERS; tier++) {
@@ -142,6 +142,7 @@ public class PerkTreeMenu extends Menu {
             possible += p.maxRank();
         }
         int level = profile.level(skill);
+        int spent = spentOn(profile);
 
         return Icon.of(skill.icon())
                 .name(skill.display(), skill.color())
@@ -156,27 +157,36 @@ public class PerkTreeMenu extends Menu {
                 .line(Component.text("Points to spend ", Icon.DIM)
                         .append(Component.text(String.valueOf(profile.points(skill)),
                                 profile.points(skill) > 0 ? Icon.GOOD : Icon.DIM)))
+                .blank()
+                .line(Component.text("Shift + Left Click  ", spent > 0 ? Icon.WARN : Icon.DIM)
+                        .append(Component.text(spent > 0
+                                ? "refund all perks (" + spent + " point" + (spent == 1 ? "" : "s") + ")"
+                                : "nothing to refund", Icon.DIM)))
                 .glow(profile.points(skill) > 0)
                 .build();
     }
 
-    private ItemStack resetButton(PlayerProfile profile) {
+    private int spentOn(PlayerProfile profile) {
         int spent = 0;
         for (Perk p : Perk.of(skill)) {
             for (int i = 1; i <= profile.rank(p); i++) {
                 spent += p.costFor(i);
             }
         }
-        return Icon.head(Heads.RESET)
-                .name("Refund Perks", spent > 0 ? Icon.WARN : Icon.DIM)
-                .line("Clear every " + skill.display() + " perk", Icon.DIM)
-                .blank()
-                .line(Component.text("Returns ", Icon.DIM)
-                        .append(Component.text(spent + " point" + (spent == 1 ? "" : "s"),
-                                spent > 0 ? Icon.GOOD : Icon.DIM)))
-                .blank()
-                .line(spent > 0 ? "Click to refund" : "Nothing to refund",
-                        spent > 0 ? Icon.ACCENT : Icon.DIM)
+        return spent;
+    }
+
+    private Skill nextSkill() {
+        Skill[] all = Skill.values();
+        return all[(skill.ordinal() + 1) % all.length];
+    }
+
+    private ItemStack nextButton() {
+        Skill n = nextSkill();
+        return Icon.head(Heads.ARROW_RIGHT)
+                .name("Next Tree", Icon.TEXT)
+                .line(Component.text("Go to ", Icon.DIM)
+                        .append(Component.text(n.display(), n.color())))
                 .build();
     }
 
@@ -268,7 +278,16 @@ public class PerkTreeMenu extends Menu {
                 player.closeInventory();
                 return;
             }
-            case RESET -> {
+            case NEXT -> {
+                skill = nextSkill();
+                Fx.click(player);
+                refresh();
+                return;
+            }
+            case BANNER -> {
+                if (!(event.isShiftClick() && event.isLeftClick())) {
+                    return;
+                }
                 PlayerProfile profile =
                         plugin.store().getOrCreate(player.getUniqueId(), player.getName());
                 int refunded = profile.resetPerks(skill);

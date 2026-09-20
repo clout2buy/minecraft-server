@@ -37,10 +37,15 @@ public class PerkTreeMenu extends Menu {
     /** Row 1 is the nine segment XP bar, slots 9 to 17. */
     private static final int BAR_ROW = 9;
 
-    /** Branch rows: upper perks on row 2, lower perks on row 4. */
+    /**
+     * Perks sit in a centred 5x2 block: row 2 and row 3, columns 2 to 6, so
+     * each column is one tier. Row 4 is a single strip of tier markers under
+     * the block. Nothing else in between - no arrows, no spacers.
+     */
     private static final int TOP_ROW = 18;
-    private static final int RULER_ROW = 27;
-    private static final int BOTTOM_ROW = 36;
+    private static final int BOTTOM_ROW = 27;
+    private static final int TIER_ROW = 36;
+    private static final int FIRST_COL = 2;
 
     /** Tab row. */
     private static final int TAB_ROW = 45;
@@ -94,9 +99,9 @@ public class PerkTreeMenu extends Menu {
 
         drawXpBar(profile);
 
-        // Five tiers across, two perks per tier, arrows between the columns.
+        // One column per tier, two perks stacked, tier marker underneath.
         for (int tier = 0; tier < TIERS; tier++) {
-            int col = tier * 2;
+            int col = FIRST_COL + tier;
             int top = perkIndex(tier, true);
             int bottom = perkIndex(tier, false);
 
@@ -111,15 +116,7 @@ public class PerkTreeMenu extends Menu {
                 slotMap.put(BOTTOM_ROW + col, perk);
             }
 
-            set(RULER_ROW + col, ruler(perks, tier, level));
-
-            if (tier < TIERS - 1) {
-                int nextGate = gateOf(perks, tier + 1);
-                boolean open = level >= nextGate;
-                set(TOP_ROW + col + 1, branchArrow(open, nextGate));
-                set(BOTTOM_ROW + col + 1, branchArrow(open, nextGate));
-                set(RULER_ROW + col + 1, spacer(open));
-            }
+            set(TIER_ROW + col, ruler(perks, tier, level));
         }
 
         drawTabs(profile);
@@ -189,24 +186,10 @@ public class PerkTreeMenu extends Menu {
         }
     }
 
-    /** The arrow joining one tier to the next. */
-    private ItemStack branchArrow(boolean open, int gate) {
-        return Icon.head(open ? Heads.ARROW_RIGHT : Heads.ARROW_RIGHT_DIM)
-                .plainName(open ? "\u25B6" : "\u25B7", open ? Icon.NEON : Icon.DIM)
-                .line(open ? "Path open" : "Path sealed", open ? Icon.GOOD : Icon.BAD)
-                .line(open ? "The next tier is reachable"
-                        : "Reach level " + gate + " to continue", Icon.DIM)
-                .build();
-    }
-
-    private ItemStack spacer(boolean open) {
-        return Icon.of(open ? Material.CYAN_STAINED_GLASS_PANE
-                        : Material.BLACK_STAINED_GLASS_PANE)
-                .plainName(" ", Icon.DIM)
-                .build();
-    }
-
-    /** Tier marker sitting between the two branches. */
+    /**
+     * Tier marker under each column. Same glass language as the XP bar:
+     * black = locked, skill colour = open, lime = every rank in the tier taken.
+     */
     private ItemStack ruler(List<Perk> perks, int tier, int level) {
         int gate = gateOf(perks, tier);
         boolean reached = level >= gate;
@@ -219,20 +202,22 @@ public class PerkTreeMenu extends Menu {
         }
 
         Material mat;
+        String state;
         if (possible > 0 && owned >= possible) {
             mat = Material.LIME_STAINED_GLASS_PANE;
-        } else if (owned > 0) {
-            mat = paneFor(skill);
+            state = "Complete";
         } else if (reached) {
-            mat = Material.GRAY_STAINED_GLASS_PANE;
+            mat = paneFor(skill);
+            state = "Open";
         } else {
-            mat = Material.RED_STAINED_GLASS_PANE;
+            mat = Material.BLACK_STAINED_GLASS_PANE;
+            state = "Locked";
         }
 
         return Icon.of(mat)
-                .plainName("Tier " + (tier + 1), reached ? skill.color() : Icon.DIM)
-                .line(reached ? "Unlocked at level " + gate
-                        : "Locked until level " + gate, reached ? Icon.GOOD : Icon.BAD)
+                .plainName("Tier " + (tier + 1) + "  \u00b7  " + state, reached ? skill.color() : Icon.DIM)
+                .line(reached ? "Unlocks at level " + gate + "  \u2713"
+                        : "Reach level " + gate + " to unlock", reached ? Icon.GOOD : Icon.DIM)
                 .line(Component.text("Ranks taken  ", Icon.DIM)
                         .append(Component.text(owned + " / " + possible, Icon.TEXT)))
                 .build();
@@ -291,9 +276,7 @@ public class PerkTreeMenu extends Menu {
         int cost = perk.costFor(rank + 1);
         boolean affordable = profile.points(skill) >= cost;
 
-        Material mat = unlocked ? perk.icon() : Material.GRAY_DYE;
-
-        Icon icon = Icon.of(mat, Math.max(1, rank))
+        Icon icon = Icon.of(perk.icon(), Math.max(1, rank))
                 .name(perk.display(), unlocked ? skill.color() : Icon.DIM)
                 .line(perk.flavour(), Icon.DIM)
                 .blank()
@@ -315,8 +298,8 @@ public class PerkTreeMenu extends Menu {
 
         icon.blank();
         if (!unlocked) {
-            icon.line("LOCKED", Icon.BAD)
-                    .line("Needs " + skill.display() + " level " + perk.unlockLevel(), Icon.DIM);
+            icon.line("\uD83D\uDD12 Locked", Icon.BAD)
+                    .line("Reach " + skill.display() + " level " + perk.unlockLevel(), Icon.DIM);
         } else if (maxed) {
             icon.line("MAXED", Icon.WARN);
         } else {

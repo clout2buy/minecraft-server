@@ -96,7 +96,7 @@ public class EndgameCommand implements CommandExecutor, TabCompleter {
                     for (com.pallarium.endgame.boss.BossDef d
                             : com.pallarium.endgame.boss.Bosses.all()) {
                         sender.sendMessage(Component.text("  " + d.id() + "  ", Icon.DIM)
-                                .append(Component.text(d.name(), d.color()))
+                                .append(Component.text(d.display(), d.color()))
                                 .append(Component.text("  " + (int) d.health() + "hp  "
                                         + d.phases().size() + " phases", Icon.DIM)));
                     }
@@ -109,7 +109,7 @@ public class EndgameCommand implements CommandExecutor, TabCompleter {
                             "Unknown boss. Try /endgame boss list", Icon.BAD)));
                 } else {
                     sender.sendMessage(tag().append(Component.text(
-                            "Spawned " + inst.def().name() + ".", Icon.GOOD)));
+                            "Spawned " + inst.def().display() + ".", Icon.GOOD)));
                 }
                 return true;
             }

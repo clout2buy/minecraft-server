@@ -31,10 +31,12 @@ public class BossService {
         if (def == null || at.getWorld() == null) {
             return null;
         }
-        BossInstance inst = new BossInstance(plugin, def, at);
-        if (inst.entity() == null) {
+        org.bukkit.entity.Entity spawned = at.getWorld().spawnEntity(at, def.type());
+        if (!(spawned instanceof LivingEntity body)) {
+            spawned.remove();
             return null;
         }
+        BossInstance inst = new BossInstance(plugin, def, body);
         live.put(inst.entity().getUniqueId(), inst);
         inst.begin();
         return inst;

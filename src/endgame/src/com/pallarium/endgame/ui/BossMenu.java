@@ -54,7 +54,7 @@ public class BossMenu extends Menu {
             BossDef def = all.get(i);
             boolean current = def == selected;
             Icon icon = Icon.of(def.icon())
-                    .name(def.name(), current ? def.color() : Icon.TEXT)
+                    .name(def.display(), current ? def.color() : Icon.TEXT)
                     .line(def.subtitle(), Icon.DIM)
                     .blank()
                     .line(Component.text("Health ", Icon.DIM)
@@ -85,14 +85,14 @@ public class BossMenu extends Menu {
                 .build());
 
         set(LIVE, liveCard());
-        set(BACK, Icon.back());
+        set(BACK, Icon.back("Admin"));
         fillEmpty();
     }
 
     /** The fight breakdown: one item per phase with its whole rotation. */
     private void drawDetail() {
         set(19, Icon.of(selected.icon())
-                .name(selected.name(), selected.color())
+                .name(selected.display(), selected.color())
                 .line(selected.lore(), Icon.DIM)
                 .blank()
                 .line(Component.text("Damage    ", Icon.DIM)
@@ -146,8 +146,8 @@ public class BossMenu extends Menu {
                 break;
             }
             set(slot++, Icon.of(drop.material())
-                    .name(drop.label() == null
-                            ? pretty(drop.material().name()) : drop.label(), Icon.WARN)
+                    .name(drop.name() == null
+                            ? pretty(drop.material().name()) : drop.name(), Icon.WARN)
                     .line(Component.text(drop.min() + " to " + drop.max(), Icon.TEXT))
                     .line(Component.text(drop.chance() + "% chance", Icon.DIM))
                     .build());
@@ -165,7 +165,7 @@ public class BossMenu extends Menu {
         } else {
             for (BossInstance inst : active) {
                 icon.line(Component.text("\u25C6 ", inst.def().color())
-                        .append(Component.text(inst.def().name() + "  ", Icon.TEXT))
+                        .append(Component.text(inst.def().display() + "  ", Icon.TEXT))
                         .append(Component.text(inst.healthPercentText(), Icon.GOOD)));
                 icon.line(Component.text("   " + inst.currentPhase().name(), Icon.DIM));
             }

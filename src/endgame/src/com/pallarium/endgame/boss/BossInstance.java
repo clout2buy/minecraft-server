@@ -481,7 +481,7 @@ public class BossInstance {
             // combat xp for the kill, weighted by contribution
             double share = best <= 0 ? 1 : e.getValue() / Math.max(1, sumLedger());
             int xp = (int) Math.max(200, def.xpReward() * share);
-            plugin.xp().give(p, com.pallarium.endgame.skill.Skill.COMBAT, xp);
+            plugin.xp().award(p, com.pallarium.endgame.skill.Skill.COMBAT, xp);
 
             rollLoot(p, at, isTop);
         }
@@ -548,6 +548,72 @@ public class BossInstance {
 
     public UUID id() {
         return id;
+    }
+
+    /* ================================================================== */
+    /*  names the service, listener and UI call in on                      */
+    /* ================================================================== */
+
+    /** Starts the fight. */
+    public void begin() {
+        start();
+    }
+
+    /** Ends the fight and removes everything. */
+    public void cleanup(boolean removeBoss) {
+        end(false);
+        if (removeBoss && entity != null && entity.isValid()) {
+            entity.remove();
+        }
+    }
+
+    /** Called when the boss dies for real. */
+    public void onDeath() {
+        end(true);
+    }
+
+    /** Records damage a player dealt, for the loot and xp split. */
+    public void addThreat(Player p, double amount) {
+        damageLedger.merge(p.getUniqueId(), amount, Double::sum);
+    }
+
+    /** Refreshes the bar after the boss took a hit. */
+    public void onDamaged(double amount) {
+        updateBar();
+    }
+
+    /** True if this entity is one of our summoned minions. */
+    public boolean ownsMinion(org.bukkit.entity.Entity e) {
+        if (e == null) {
+            return false;
+        }
+        for (LivingEntity m : minions) {
+            if (m.getUniqueId().equals(e.getUniqueId())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /** Drops a dead minion off the tracked list. */
+    public void onMinionDeath(org.bukkit.entity.Entity e) {
+        minions.removeIf(m -> m.getUniqueId().equals(e.getUniqueId()));
+    }
+
+    /** Removes a player's bossbar when they log out mid fight. */
+    public void dropPlayer(Player p) {
+        p.hideBossBar(bar);
+        barViewers.remove(p);
+    }
+
+    /** The phase currently running. */
+    public Phase currentPhase() {
+        return phase;
+    }
+
+    /** Health as a short readable percent, for the admin UI. */
+    public String healthPercentText() {
+        return (int) Math.round(healthFraction() * 100) + "%";
     }
 
     public Location arenaCenter() {

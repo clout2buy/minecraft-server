@@ -145,7 +145,7 @@ public class PerkTreeMenu extends Menu {
 
         for (int i = 0; i < 9; i++) {
             boolean lit = i < filled;
-            ItemStack seg = Icon.of(lit ? paneFor(skill) : Material.BLACK_STAINED_GLASS_PANE)
+            ItemStack seg = Icon.of(lit ? Material.WHITE_STAINED_GLASS_PANE : Material.BLACK_STAINED_GLASS_PANE)
                     .plainName(lit ? "\u2588" : " ", lit ? skill.color() : Icon.DIM)
                     .line(Component.text("Level " + level, Icon.DIM)
                             .append(Component.text("  \u2192  ", Icon.DIM))

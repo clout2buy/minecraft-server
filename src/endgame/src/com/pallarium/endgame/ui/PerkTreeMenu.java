@@ -119,7 +119,6 @@ public class PerkTreeMenu extends Menu {
             set(TIER_ROW + col, ruler(perks, tier, level));
         }
 
-        drawTabs(profile);
         set(CLOSE, Icon.close());
 
         fillEmpty();
@@ -207,7 +206,7 @@ public class PerkTreeMenu extends Menu {
             mat = Material.LIME_STAINED_GLASS_PANE;
             state = "Complete";
         } else if (reached) {
-            mat = paneFor(skill);
+            mat = Material.WHITE_STAINED_GLASS_PANE;
             state = "Open";
         } else {
             mat = Material.BLACK_STAINED_GLASS_PANE;
